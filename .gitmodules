@@ -1,0 +1,3 @@
+[submodule "deepproblog"]
+	path = deepproblog
+	url = https://bitbucket.org/problog/deepproblog/

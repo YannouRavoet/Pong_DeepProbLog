@@ -1,0 +1,8 @@
+pygame
+numpy
+problog
+torch
+torchvision
+nose
+cysignals
+PySDD
