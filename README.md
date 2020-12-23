@@ -1,4 +1,4 @@
-##PLANNING
+## PLANNING
 1. Implement Pong Game in Python 
     * 28x28 screen
         - ball size = 1 pixel
