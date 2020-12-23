@@ -110,8 +110,12 @@ class Game:
             for row in data:
                 writer.writerow(row)
 
+    def train_ai(self, train_queries, test_queries):
+        self.ai.train(train_queries, test_queries)
+
 
 if __name__ == "__main__":
     game = Game()
+    game.generate_raw_data("../data/imgs", "../data/data.csv", start_rounds=300000, append=True, end_rounds=400000)
+    # game.train_ai()
     # game.run()
-    game.generate_raw_data("data/imgs", "data/data.csv", start_rounds=150, append=True, end_rounds=300000)
