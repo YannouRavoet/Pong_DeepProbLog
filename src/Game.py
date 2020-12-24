@@ -7,6 +7,7 @@ import pygame
 from dataclasses import dataclass
 from GameObjects import Ball, AIPlayer, HumanPlayer
 from Global import screen_width, screen_height
+from data_loader import load
 
 
 @dataclass
@@ -22,31 +23,31 @@ class Game:
         self.screen = pygame.display.set_mode((screen_width, screen_height), pygame.SCALED)
         pygame.display.set_caption('Pong')
 
-        self.player = HumanPlayer(x=0, y=screen_height / 2, speed=1)
+        self.human = HumanPlayer(x=0, y=screen_height / 2, speed=1)
         self.ai = AIPlayer(screen_width - 1, screen_height / 2, speed=1)
         ball_collider_group = pygame.sprite.Group()
-        ball_collider_group.add(self.player, self.ai)
+        ball_collider_group.add(self.human, self.ai)
         self.ball = Ball(x_speed=-1, y_speed=1, collider_group=ball_collider_group)
         self.draw_group = pygame.sprite.Group()
-        self.draw_group.add(self.player, self.ai, self.ball)
+        self.draw_group.add(self.human, self.ai, self.ball)
 
     def update(self):
         self.draw_group.update(self.get_screen_pixels())
         if self.ball.rect.right > screen_width:
-            self.player.score += 1
+            self.human.score += 1
             self.ball.reset()
-            print(f"Player: {self.player.score} - AI: {self.ai.score}")
+            print(f"Player: {self.human.score} - AI: {self.ai.score}")
         if self.ball.rect.left < 0:
             self.ai.score += 1
             self.ball.reset()
-            print(f"Player: {self.player.score} - AI: {self.ai.score}")
+            print(f"Player: {self.human.score} - AI: {self.ai.score}")
 
     def draw(self):
         self.screen.fill(Colors.dark_gray)
         self.draw_group.draw(self.screen)
 
         pygame.display.flip()
-        self.clock.tick(10)
+        self.clock.tick(1)
 
     def get_screen_pixels(self):
         pixels = pygame.surfarray.pixels3d(self.screen)
@@ -59,11 +60,12 @@ class Game:
 
     """Generates frames representing different game-states. The saved meta-data contains the:
             1. id of the image
-            2. x and y coordinates of the player
-            3. x and y coordinates of the opponent
+            2. x and y coordinates of the human
+            3. x and y coordinates of the ai
             4. x and y coordinates of the ball
+            5. desired action to take (based on diff(aiy, bally)
+            
     Deletes all previously generated data if not appending."""
-
     def generate_raw_data(self, img_folder, csv_path, append=False, start_rounds=0, end_rounds=1000):
         if not append:
             shutil.rmtree(img_folder)
@@ -72,33 +74,33 @@ class Game:
         data = list()
         for i in range(start_rounds, end_rounds):
             # set player and ai position
-            self.player.rect.centery = random.randrange(1, screen_height - 1)
+            self.human.rect.centery = random.randrange(1, screen_height - 1)
             self.ai.rect.centery = random.randrange(1, screen_height - 1)
             # set ball position
             self.ball.rect.center = (random.randrange(0, screen_width), random.randrange(0, screen_height))
             if self.ball.rect.centerx == 0:  # if ball could be colliding with player paddle
-                while self.ball.rect.centery in range(self.player.rect.centery - 1, self.player.rect.centery + 2):
+                while self.ball.rect.centery in range(self.human.rect.centery - 1, self.human.rect.centery + 2):
                     self.ball.rect.centery = random.randrange(0, screen_height)
             elif self.ball.rect.centerx == screen_width - 1:  # if ball could be colliding with opponent paddle
                 while self.ball.rect.centery in range(self.ai.rect.centery - 1, self.ai.rect.centery + 2):
                     self.ball.rect.centery = random.randrange(0, screen_height)
             # set desired action
             if self.ai.rect.centery > self.ball.rect.centery:
-                action = -1
+                action = 'up'
             elif self.ai.rect.centery < self.ball.rect.centery:
-                action = 1
+                action = 'down'
             else:
-                action = 0
+                action = 'noop'
 
             self.draw()
             img_name = str(i) + '.png'
-            img_path = os.path.join(img_folder, img_name)
+            img_path = os.path.join(img_folder, action, img_name)
             pygame.image.save(self.screen, img_path)
             data.append({"img_id": img_name,
-                         "playerx": self.player.rect.centerx,
-                         "playery": self.player.rect.centery,
-                         "opponentx": self.ai.rect.centerx,
-                         "opponenty": self.ai.rect.centery,
+                         "humanx": self.human.rect.centerx,
+                         "humany": self.human.rect.centery,
+                         "aix": self.ai.rect.centerx,
+                         "aiy": self.ai.rect.centery,
                          "ballx": self.ball.rect.centerx,
                          "bally": self.ball.rect.centery,
                          "action": action})
@@ -116,6 +118,6 @@ class Game:
 
 if __name__ == "__main__":
     game = Game()
-    game.generate_raw_data("../data/imgs", "../data/data.csv", start_rounds=300000, append=True, end_rounds=400000)
-    # game.train_ai()
-    # game.run()
+    # game.generate_raw_data("../data", "../data/data.csv", start_rounds=300000, append=True, end_rounds=400000)
+    # game.train_ai(load('train_data.txt'), load('test_data.txt'))
+    game.run()

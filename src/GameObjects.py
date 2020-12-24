@@ -1,12 +1,13 @@
+import numpy as np
 import pygame
 import random
 from abc import abstractmethod
 
 import torch
+from problog.logic import list2term, Term, Constant
 
 from Global import screen_height, screen_width
-
-from deepproblog.network import Network
+from network import Network
 from model import Model
 from optimizer import Optimizer
 from pong_model import PONG_Net, neural_predicate
@@ -28,7 +29,7 @@ class Player(GameObject):
     def __init__(self, x, y, speed):
         super().__init__('../resources/paddle.png', x, y)
         self.speed = speed
-        self.movement = 0  # -1, 0, +1
+        self.movement = 0  # up, noop, +down
         self.score = 0
 
     @abstractmethod
@@ -69,7 +70,10 @@ class AIPlayer(Player):
         self.net = Network(self.network, 'pong_net', neural_predicate)
         self.net.optimizer = torch.optim.Adam(self.network.parameters(), lr=0.001)
         self.model = Model(self.problog_string, [self.net], caching=False)
+        self.model.load_state('model_iter_10000.mdl')
         self.optimizer = Optimizer(self.model, 2)
+
+        self.action_mapping = {'down': +1, 'noop': 0, 'up': -1}  # maps the actions to the correct movement
 
     def train(self, train_queries, test_queries):
         train_model(self.model, train_queries,
@@ -78,8 +82,19 @@ class AIPlayer(Player):
                     test_iter=1000, test=lambda x: x.accuracy(test_queries, test=True), snapshot_iter=10000)
 
     """Calls the logic program passing the screen pixels as input"""
+
     def update_movement(self, screen):
-        self.movement = random.choice([-1, 0, +1])
+        screen = np.transpose(screen, (2, 1, 0))  # 28x28x3 -> 3x28x28
+        screen = screen.flatten()
+        screen = list(map(lambda x: int(x), screen))
+        img_term = list2term(screen)
+        results = self.model.solve(Term('choose_action', *[Constant(self.rect.centery), img_term, None]))
+        best_query_result = max(results.keys(), key=lambda k: results[k][0])
+        best_action = best_query_result.args[-1]
+        best_movement = self.action_mapping[str(best_action)]
+        self.movement = best_movement
+
+        # self.movement = random.choice([-1, 0, +1])
 
 
 class Ball(GameObject):
