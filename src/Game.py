@@ -5,13 +5,14 @@ import shutil
 
 import pygame
 from dataclasses import dataclass
-from GameObjects import Ball, AIPlayer, HumanPlayer, Opponent, Random
+from GameObjects import Ball, AIPlayer, HumanPlayer, Opponent, RandomPlayer
 from Global import SCREEN_WIDTH, SCREEN_HEIGHT, FPS
 from baseline import train_pytorch
 from data_loader import load
 from train import train_model
 
-
+PLAYER_SPEED = 1
+BALL_SPEED = 1
 @dataclass
 class Colors:
     light_gray = (200, 200, 200)
@@ -25,18 +26,18 @@ class Game:
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SCALED)
         pygame.display.set_caption('Pong')
 
-        self.opponent = Opponent(x=0, y=SCREEN_HEIGHT / 2, speed=1, precision=0.9)
-        self.ai = AIPlayer(SCREEN_WIDTH - 1, SCREEN_HEIGHT / 2, speed=1)
-        # self.ai.load_model_snapshot('./models/model_iter_80000.mdl')
+        # self.opponent = Opponent(x=0, y=SCREEN_HEIGHT / 2, speed=GAME_SPEED, precision=0.9)
+        self.opponent = RandomPlayer(x=0, y=SCREEN_HEIGHT/2, speed=PLAYER_SPEED)
+        self.ai = AIPlayer(SCREEN_WIDTH - 1, SCREEN_HEIGHT / 2, speed=PLAYER_SPEED)
+        self.ai.load_model_snapshot('./models/model_iter_80000.mdl')
         ball_collider_group = pygame.sprite.Group()
         ball_collider_group.add(self.opponent, self.ai)
-        self.ball = Ball(x_speed=-1, y_speed=1, collider_group=ball_collider_group)
+        self.ball = Ball(speed=BALL_SPEED, collider_group=ball_collider_group)
         self.draw_group = pygame.sprite.Group()
         self.draw_group.add(self.opponent, self.ai, self.ball)
 
         self.round = 1
         self.scores = {'Opponent': 0, 'AI': 0}
-        self.bounces = list()
 
     def update(self):
         self.draw_group.update(self.get_screen_pixels(), self.ball.rect.y)
@@ -47,7 +48,6 @@ class Game:
                 self.scores['AI'] += 1
             self.round += 1
             print(self.scores)
-            self.bounces.append(self.ball.bounces)
             self.ball.reset()
             self.ai.reset()
             self.opponent.reset()
@@ -69,7 +69,6 @@ class Game:
             self.update()
         print(f"Results after {rounds} rounds:")
         print(f"Opponent: {self.scores['Opponent']} vs AI: {self.scores['AI']}")
-        print(f"Bounces: {self.bounces}")
 
     def generate_raw_data(self, data_dir, metadata_file, append=False, start_rounds=0, end_rounds=1000):
         """Generates frames representing different game-states. The saved meta-data contains the:
@@ -141,6 +140,6 @@ class Game:
 if __name__ == "__main__":
     game = Game()
     # game.generate_raw_data("../data", "../data/data.csv", start_rounds=100000, append=True, end_rounds=101000)
-    game.train_deepproblog(epochs=1)
+    # game.train_deepproblog(epochs=1)
     # game.train_pytorch(epochs=2)
-    # game.run(rounds=100)
+    game.run(rounds=100)

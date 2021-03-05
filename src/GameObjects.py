@@ -9,7 +9,7 @@ from problog.logic import list2term, Term, Constant
 from Global import SCREEN_HEIGHT, SCREEN_WIDTH
 from network import Network
 from model import Model
-from optimizer import Optimizer, SGD
+from optimizer import Optimizer
 from pong_model import PONG_Net, neural_predicate
 
 
@@ -46,7 +46,7 @@ class Player(GameObject):
 
     def reset(self):
         self.rect.centerx = self.x_init
-        self.rect.centery = self.y_init
+        self.rect.centery = self.y_init + random.choice([-1, 0, 1])
 
 
 class HumanPlayer(Player):
@@ -61,7 +61,7 @@ class HumanPlayer(Player):
                 self.movement = 0
 
 
-class Random(Player):
+class RandomPlayer(Player):
     def __init__(self, x, y, speed):
         super().__init__(x, y, speed)
 
@@ -88,7 +88,7 @@ class Opponent(Player):
 class AIPlayer(Player):
     def __init__(self, x, y, speed):
         super().__init__(x, y, speed)
-        with open('ai.pl') as f:
+        with open('ai_v1.pl') as f:
             self.problog_string = f.read()
 
         self.network = PONG_Net()
@@ -116,27 +116,24 @@ class AIPlayer(Player):
 
 
 class Ball(GameObject):
-    def __init__(self, x_speed, y_speed, collider_group):
+    def __init__(self, speed, collider_group):
         super().__init__('../resources/ball.png', SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
-        self.x_speed = x_speed
-        self.y_speed = y_speed
+        self.speed = speed
+        self.x_dir = random.choice([-1, 1])
+        self.y_dir = random.choice([-1, 1])
         self.collider_group = collider_group
 
-        self.bounces = 0
-
     def update(self, screen, ball_y):
-        self.rect.x += self.x_speed
-        self.rect.y += self.y_speed
-
-        if self.rect.top <= 0 or self.rect.bottom >= SCREEN_HEIGHT:  # if you hit screen top or bottom edge
-            self.y_speed *= -1
-
-        if pygame.sprite.spritecollide(self, self.collider_group, False):
-            collision_object = pygame.sprite.spritecollide(self, self.collider_group, False)[0].rect
-            self.x_speed *= -1
-            self.rect.x = collision_object.x + self.x_speed / abs(self.x_speed)
-            self.bounces += 1
+        for i in range(1, self.speed + 1):
+            self.rect.x += self.x_dir
+            self.rect.y += self.y_dir
+            if self.rect.y == 0 or self.rect.y == SCREEN_HEIGHT - 1:  # if you hit screen top or bottom edge
+                self.y_dir *= -1
+            if pygame.sprite.spritecollide(self, self.collider_group, False):
+                self.x_dir *= -1
+                self.rect.x += self.x_dir  # undo the horizontal movement
 
     def reset(self):
-        self.rect.center = (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
-        self.bounces = 0
+        self.rect.center = (self.x_init, self.y_init)
+        self.x_dir = random.choice([-1, 1])
+        self.y_dir = random.choice([-1, 1])

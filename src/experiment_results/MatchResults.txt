@@ -1,2 +1,4 @@
 match: AI vs Random
-wins: 896 vs 104
+ball_y_speed: 1
+players_y_speed: 1
+wins: 937 vs 63
