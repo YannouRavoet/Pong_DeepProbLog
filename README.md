@@ -24,4 +24,8 @@ a CNN and reasons on which action to take with first-order logic.
     * player position is passed when querrying logic program for desired_action
     * opponent position is not taken into account
     
+## TODO
+1. Retrain with new data (remove ball position at x=0 or x=SCREEN_WIDTH-1)
+2. Trained model is still not really accurate enough to be ready for any opposition.
+    
 

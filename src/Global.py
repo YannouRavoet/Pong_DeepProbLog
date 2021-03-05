@@ -1,3 +1,3 @@
-
-screen_width = 28
-screen_height = 28
+FPS = 30
+SCREEN_WIDTH = 30
+SCREEN_HEIGHT = 16

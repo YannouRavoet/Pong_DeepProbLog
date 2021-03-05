@@ -7,3 +7,6 @@ nose
 cysignals
 PySDD
 sklearn
+seaborn
+matplotlib
+pandas

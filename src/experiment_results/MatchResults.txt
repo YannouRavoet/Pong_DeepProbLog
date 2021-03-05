@@ -1,0 +1,2 @@
+match: AI vs Random
+wins: 896 vs 104
