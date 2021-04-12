@@ -21,3 +21,6 @@ For this run the data_handling.py file.
 An example dataset of 500 images is provided. However, it is advised to generate around 5000 images for 
 optimal performance of the deepproblog agent. Generating data takes around 50s/1000images.
 
+<p align="center">
+	<img src="https://github.com/YannouRavoet/Pong_DeepProbLog/agentv2.gif"/>
+</p>
