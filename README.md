@@ -22,5 +22,5 @@ An example dataset of 500 images is provided. However, it is advised to generate
 optimal performance of the deepproblog agent. Generating data takes around 50s/1000images.
 
 <p align="center">
-	<img src="https://github.com/YannouRavoet/Pong_DeepProbLog/agentv2.gif"/>
+	<img src="https://github.com/YannouRavoet/Pong_DeepProbLog/blob/master/agentv2.gif"/>
 </p>
