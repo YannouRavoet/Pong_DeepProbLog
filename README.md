@@ -1,31 +1,23 @@
 # PONG DeepProbLog
-Made in context of the Capita Selecta Course: AI - Neurosymbolic approaches (2020). 
+Made in context of the Capita Selecta Course: AI - Neurosymbolic AI (2020). 
 This program runs an ai opponent for the game of Pong. It perceives the screen through 
 a CNN and reasons on which action to take with first-order logic.
- 
-## TASKS
-1. Implement Pong Game in Python 
-    * 28x28 screen
-        - ball size = 1 pixel
-        - paddles = 1x3 pixels
-    * Human Player vs AI Player (receives screen each update)
-    * AI logic model (.pl file)
-2. Generate Raw Data
-    * Contains positions of player, opponent and ball
-    * Divide into train and test dataset
-3. Compute First logic data in the form of queries
-    * Based on position of the ball and player, decide if action is noop, up or down
-    * X = img_id, Y=desired_action
-        - query = choose_action(train(img_id), desired_action)
-        - query = choose_action(test(img_id), desired_action)
-4. Train ai CNN model with queries
-5. Write python part of ai model
-    * player position is set at start and kept track of
-    * player position is passed when querrying logic program for desired_action
-    * opponent position is not taken into account
-    
-## TODO
-1. Retrain with new data (remove ball position at x=0 or x=SCREEN_WIDTH-1)
-2. Trained model is still not really accurate enough to be ready for any opposition.
-    
+
+## INSTALL
+Simply install all dependencies from the requirements.txt file with pip.
+
+## USAGE
+In the Game.py file you can comment/uncomment the following functionalities:
+
+* generating data
+* training a DeepProblog agent
+* training a Pytorch agent
+* running a match between a DeepProblog agent and a random agent
+
+After having generated the data, (**before training the agents**), you need to sort the data into appropriate directories 
+(since we load training/testing data as ImageFolders).
+For this run the data_handling.py file.
+
+An example dataset of 500 images is provided. However, it is advised to generate around 5000 images for 
+optimal performance of the deepproblog agent. Generating data takes around 50s/1000images.
 

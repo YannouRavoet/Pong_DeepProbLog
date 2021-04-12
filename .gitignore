@@ -1,3 +1,18 @@
-.idea
-venv/
-data/*
+#ignore rootfiles and rootdirectories
+/*
+/*/
+
+#unignore specific directories
+!/data/
+!/deepproblog/
+!/resources/
+!/src/
+
+#unignore specific files
+!/.gitignore
+!/__init__.py
+!/README.md
+!/requirements.txt
+
+!/report.pdf
+!/presentation.pdf
